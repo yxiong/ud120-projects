@@ -27,6 +27,17 @@ features_train, features_test, labels_train, labels_test = preprocess()
 #########################################################
 ### your code goes here ###
 
+from sklearn.metrics import accuracy_score
+from sklearn import tree
+
+print "number of features:", len(features_train[0])
+
+classifier = tree.DecisionTreeClassifier(min_samples_split = 40)
+classifier.fit(features_train, labels_train)
+
+predictions = classifier.predict(features_test)
+
+print "accuracy score:", accuracy_score(predictions, labels_test)
 
 #########################################################
 
