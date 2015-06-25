@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import numpy as np
+
 
 def outlierCleaner(predictions, ages, net_worths):
     """
@@ -14,7 +16,9 @@ def outlierCleaner(predictions, ages, net_worths):
     cleaned_data = []
 
     ### your code goes here
-
+    error = np.abs(predictions - net_worths)
+    valid = error < np.percentile(error, 90)
+    cleaned_data = zip(ages[valid], net_worths[valid], error[valid])
     
     return cleaned_data
 
