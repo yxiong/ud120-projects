@@ -30,7 +30,7 @@ target, features = targetFeatureSplit( data )
 from sklearn.cross_validation import train_test_split
 feature_train, feature_test, target_train, target_test = train_test_split(features, target, test_size=0.5, random_state=42)
 train_color = "b"
-test_color = "b"
+test_color = "r"
 
 
 
@@ -39,8 +39,24 @@ test_color = "b"
 ### plots it correctly. Don't forget to change the test_color from "b" to "r"
 ### to differentiate training points from test points.
 
+from sklearn.linear_model import LinearRegression
 
+reg = LinearRegression()
+reg.fit(feature_train, target_train)
+print "slope:", reg.coef_[0]
+print "intercept:", reg.intercept_
+print "score for training set:", reg.score(feature_train, target_train)
+print "score for test set:", reg.score(feature_test, target_test)
 
+features_list2 = ["bonus", "long_term_incentive"]
+data2 = featureFormat(dictionary, features_list2, remove_any_zeroes=True)
+target2, features2 = targetFeatureSplit(data2)
+feature_train2, feature_test2, target_train2, target_test2 = train_test_split(
+    features2, target2, test_size=0.5, random_state=42)
+reg2 = LinearRegression()
+reg2.fit(feature_train2, target_train2)
+print "score for test set on long term incentive:", \
+    reg2.score(feature_test2, target_test2)
 
 
 
@@ -65,6 +81,11 @@ try:
     plt.plot( feature_test, reg.predict(feature_test) )
 except NameError:
     pass
+
+reg.fit(feature_test, target_test)
+plt.plot(feature_train, reg.predict(feature_train), color="b")
+print "slope for fitting on test data", reg.coef_[0]
+
 plt.xlabel(features_list[1])
 plt.ylabel(features_list[0])
 plt.legend()
