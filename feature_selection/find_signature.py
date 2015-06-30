@@ -37,5 +37,16 @@ labels_train   = labels_train[:150]
 
 ### your code goes here
 
+from sklearn.metrics import accuracy_score
+from sklearn.tree import DecisionTreeClassifier
 
+clf = DecisionTreeClassifier()
+clf.fit(features_train, labels_train)
+predictions = clf.predict(features_test)
 
+print "accuracy from overfit:", accuracy_score(predictions, labels_test)
+print "largest importance:", numpy.max(clf.feature_importances_)
+
+important_id = numpy.argmax(clf.feature_importances_)
+words = vectorizer.get_feature_names()
+print "most important word:", words[important_id]

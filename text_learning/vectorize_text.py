@@ -54,9 +54,14 @@ for name, from_person in [("sara", from_sara), ("chris", from_chris)]:
             ### ["sara", "shackleton", "chris", "germani"]
             words = words.replace("sara", "").replace("shackleton", "")
             words = words.replace("chris", "").replace("germani", "")
-            words = " ".join(words.split())
+
+            # From next lesson, remove "sshacklensf" and "cgermannsf".
+            words = words.replace("sshacklensf", "")
+            words = words.replace("cgermannsf", "")
+            words = words.replace("houectect", "")
 
             ### append the text to word_data
+            words = " ".join(words.split())
             word_data.append(words)
 
             ### append a 0 to from_data if email is from Sara, and 1 if email is from Chris
