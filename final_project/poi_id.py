@@ -63,20 +63,30 @@ for f_idx in xrange(to_tfidf_pca.shape[1]):
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
-# AdaBoost with decision tree as baseline.
+# AdaBoost with decision tree as base estimator.
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth = 1),
                          algorithm = "SAMME",
+                         n_estimators = 40,
+                         learning_rate = 2.0,
                          random_state = 13)
 
+
+# Decision tree classifier with hand-picked parameters.
+clf = DecisionTreeClassifier(criterion="gini",
+                             max_depth = 50,
+                             min_samples_split=2,
+                             random_state = 73)
 
 # Decision tree classifier, with parameters tuned with GridSearchCV.
 # This is the classifier we choose for final analysis.
 from sklearn.grid_search import GridSearchCV
-params = {"max_depth": (10, 20, 50)}
+params = {"max_depth": (10, 20, 50),
+          "max_features": ("sqrt", "log2", None)}
 clf = GridSearchCV(DecisionTreeClassifier(random_state=73), params,
                    scoring = "f1")
+
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script.
