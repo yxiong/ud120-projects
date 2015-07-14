@@ -32,6 +32,9 @@ from sklearn.decomposition import PCA
 from_tfidf_pca, from_emails_key = cPickle.load(open("from_tfidf_pca.pkl", 'r'))
 to_tfidf_pca, to_emails_key = cPickle.load(open("to_tfidf_pca.pkl", 'r'))
 
+# Load tfidf-pca features.
+# The features are a N-vector, and we create N separate dictionary keys in `data`,
+# one for each entry in the vector.
 for p in my_dataset:
     for f_idx in xrange(from_tfidf_pca.shape[1]):
         if p in from_emails_key:
@@ -39,7 +42,6 @@ for p in my_dataset:
             my_dataset[p]["from_tfidf_pca_%d" % f_idx] = from_tfidf_pca[p_idx][f_idx]
         else:
             my_dataset[p]["from_tfidf_pca_%d" % f_idx] = "NaN"
-
     for f_idx in xrange(to_tfidf_pca.shape[1]):
         if p in to_emails_key:
             p_idx = to_emails_key.index(p)
@@ -47,6 +49,7 @@ for p in my_dataset:
         else:
             my_dataset[p]["to_tfidf_pca_%d" % f_idx] = "NaN"
 
+# Add the feature into `features_list`.
 for f_idx in xrange(from_tfidf_pca.shape[1]):
     features_list.append("from_tfidf_pca_%d" % f_idx)
 for f_idx in xrange(to_tfidf_pca.shape[1]):
@@ -83,13 +86,20 @@ clf = DecisionTreeClassifier(criterion="gini",
 # This is the classifier we choose for final analysis.
 from sklearn.grid_search import GridSearchCV
 params = {"max_depth": (10, 20, 50),
-          "max_features": ("sqrt", "log2", None)}
+          "max_features": ("sqrt", "log2")}
 clf = GridSearchCV(DecisionTreeClassifier(random_state=73), params,
                    scoring = "f1")
 
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script.
+
+# Find the best hyper-parameters through GridSearch.
+data = featureFormat(my_dataset, features_list)
+labels, features = targetFeatureSplit(data)
+clf.fit(features, labels)
+clf = clf.best_estimator_
+
 ### Because of the small size of the dataset, the script uses stratified
 ### shuffle split cross validation. For more info: 
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
