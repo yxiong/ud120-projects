@@ -288,6 +288,11 @@ Number of missing features:
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>From the results above, we see that there are 146 total number of data points, 18 of which are POI and the rest 128 are non-POI. (Note that there is one outlier data point named <code>TOTAL</code> which is actually not a person, as will be explained in Section 1.2).</p>
 <p>There are 21 features provided by the <code>final_project_dataset.pkl</code>. Among those features, the <code>loan_advances</code>, <code>director_fees</code>, <code>restricted_stock_deferred</code>, <code>deferral_payments</code>, <code>deferred_income</code> and <code>long_term_incentive</code> have more than half of the data points with missing values. (We will also create new features based on email text, as described in Section 2.1).</p>
+<p>These general observations are related to our evaluation metrics in the following ways:</p>
+<ul>
+<li>we use stratified shuffle split because the data set is small and unbalanced (more non-POIs than POIs)</li>
+<li>we use precision and recall instead of accuracy because of the unbalanced data set. If we predicted that nobody was a POI, we would get a high accuracy of 128/146 = 88%</li>
+</ul>
 
 </div>
 </div>
@@ -758,8 +763,7 @@ sYhYVbYuY4YzbvEa09p8VdIM0pjv1+10jSkft3iNMcaYBuLJVcYYY0wDseM1xhhjGogdrzHGGNNA
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>We found a data point named <code>TOTAL</code>, which is not an individual person but the summary of all other persons in the dataset. It is clearly an outlier for our identifying POI purpose, and therefore we directly remove it from the dataset.</p>
-<p>We also try to detect the outliers for some features. In the <code>bonus</code> v.s. <code>salary</code> plot, we see that there are 4 outliers: <code>LAY KENNETH L</code>, <code>SKILLING JEFFREY K</code> and <code>FREVERT MARK A</code> made salary over \$1 million, and `LAVORATO JOHN J` made a bonus \$8 million.</p>
-<p>Similary, there are several outliers for the number of emails sent and received, notably <code>KAMINSKI WINCENTY J</code> and <code>SHAPIRO RICHARD S</code> who sent and received more than 14,000 emails respectively.</p>
+<p>We also try to detect the outliers for some features. In the <code>bonus</code> v.s. <code>salary</code> plot, we see that there are 4 outliers: <code>LAY KENNETH L</code>, <code>SKILLING JEFFREY K</code> and <code>FREVERT MARK A</code> made salary over \$1 million, and `LAVORATO JOHN J` made a bonus \$8 million. Similary, there are several outliers for the number of emails sent and received, notably <code>KAMINSKI WINCENTY J</code> and <code>SHAPIRO RICHARD S</code> who sent and received more than 14,000 emails respectively. However, these data points are actual persons we are analyzing (who might or might not be POIs), and therefore we do not remove them from the dataset.</p>
 
 </div>
 </div>
@@ -1009,6 +1013,43 @@ sYhYVbYuY4YzbvEa09p8VdIM0pjv1+10jSkft3iNMcaYBuLJVcYYY0wDseM1xhhjGogdrzHGGNNA
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>We use decision tree classifier in the final analysis, and the feature importances are shown below (note that some features has zero importance, which is because we restrict the depth of the decision tree). We can see the most important feature is <code>to_tfidf_pca_2</code> (0.194), followed by <code>expenses</code>(0.188) and <code>bonus</code>(0.130).</p>
+
+<pre><code>salary : 0.0297901582669
+bonus : 0.130073326795
+total_stock_value : 0.0199757134183
+restricted_stock : 0.0
+exercised_stock_options : 0.112381395689
+expenses : 0.188253508771
+from_tfidf_pca_0 : 0.0
+from_tfidf_pca_1 : 0.0
+from_tfidf_pca_2 : 0.0
+from_tfidf_pca_3 : 0.0
+from_tfidf_pca_4 : 0.0
+from_tfidf_pca_5 : 0.112792489842
+from_tfidf_pca_6 : 0.0533765232605
+from_tfidf_pca_7 : 0.0546448087432
+from_tfidf_pca_8 : 0.0
+from_tfidf_pca_9 : 0.0
+to_tfidf_pca_0 : 0.0722967490894
+to_tfidf_pca_1 : 0.0
+to_tfidf_pca_2 : 0.194539187692
+to_tfidf_pca_3 : 0.0
+to_tfidf_pca_4 : 0.0318761384335
+to_tfidf_pca_5 : 0.0
+to_tfidf_pca_6 : 0.0
+to_tfidf_pca_7 : 0.0
+to_tfidf_pca_8 : 0.0
+to_tfidf_pca_9 : 0.0</code></pre>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="2.3-Properly-scale-features">2.3 Properly scale features<a class="anchor-link" href="#2.3-Properly-scale-features">&#182;</a></h3>
 </div>
 </div>
@@ -1080,17 +1121,21 @@ sYhYVbYuY4YzbvEa09p8VdIM0pjv1+10jSkft3iNMcaYBuLJVcYYY0wDseM1xhhjGogdrzHGGNNA
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Parameter tuning is the process of finding the best parameters for a given prediction model (aka classifier). It is performed based on a set of training data, and the goal is to find parameters that generalize well on unseen test data. The capability of this generalization can be evaluated on a validation set, which has not be seen in the tuning stage either. The validation set can be used to tune "hyper-parameters".</p>
 <p>We fine-tune the decision tree classifier using a grid search cross validation. In other words, we wrap the classifier with <code>GridSearchCV</code>, so that best parameters will be automatically chosen through cross validation. We tuned two parameters for decision tree:</p>
 <ul>
 <li><code>max_depth</code>: the maximum depth of the tree. We tried 10, 20 and 50.</li>
-<li><code>max_features</code>: The number of features to consider when looking for the best split. We tried <code>sqrt</code>, <code>log2</code> and <code>None</code> (which uses all the features).</li>
+<li><code>max_features</code>: The number of features to consider when looking for the best split. We tried <code>sqrt</code> and <code>log2</code>.</li>
 </ul>
-<p>More precisely, the classifier we use in final analysis is:</p>
+<p>More precisely, cross-validation based grid search tuning classifier is given as follows:</p>
 
 <pre><code>params = {"max_depth": (10, 20, 50),
-          "max_features": ("sqrt", "log2", None)}
+          "max_features": ("sqrt", "log2")}
 clf = GridSearchCV(DecisionTreeClassifier(random_state=73), params,
-                   scoring = "f1")</code></pre>
+                   scoring = "f1")
+
+</code></pre>
+<p>The tuning process show that the best <code>max_depth</code> parameter is <code>10</code>, and the best <code>max_features</code> parameter is <code>"log2"</code>.</p>
 
 </div>
 </div>
@@ -1141,8 +1186,9 @@ clf = GridSearchCV(DecisionTreeClassifier(random_state=73), params,
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Validation is the process of evaluating the generalization capabilities of a prediction model (aka classifier). For the classifier to be useful, they must be able to produce high classification accuracy on unseen data data, instead of already known training data. In validation process, data are split into training and test set, with training set used to tune the algorithm, and the performance evaluated and reported on the test set, which is disjoint from the training set. This will help us understand and compare generalization capabilities of different classifiers.</p>
+<p>The (hyper-)parameters of the model are chosen using cross validation implemented in <code>GridSearchCV</code>, which splits the input data to the classifier into training and validation set, use the training set to fit and validation set to decide which super-parameter achieves the best results.</p>
 <p>In the evaluation stage, we use the <code>StratifiedShuffleSplit</code> cross validation strategy as implemented in <code>tester.py</code>. More specifically, the data is split into training and test set using <code>StratifiedKFold</code> method, which preserves the percentage of samples for POI and non-POIs in each fold. During the split, 10% of the data is used for set. The evaluation is performed for 1000 iterations of re-shuffling and splitting, and the aggregated results over all iterations are reported at the end.</p>
-<p>Furthermore, the (super-)parameters of the model are also chosen using cross validation implemented in <code>GridSearchCV</code>, which splits the input data to the classifier into training and validation set, use the training set to fit and validation set to decide which super-parameter achieves the best results.</p>
 
 </div>
 </div>
@@ -1163,8 +1209,8 @@ clf = GridSearchCV(DecisionTreeClassifier(random_state=73), params,
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The final algorithm performance is:</p>
 <ul>
-<li>Precision: 0.36066</li>
-<li>Recall: 0.35200</li>
+<li>Precision: 0.40526</li>
+<li>Recall: 0.40850</li>
 </ul>
 
 </div>
